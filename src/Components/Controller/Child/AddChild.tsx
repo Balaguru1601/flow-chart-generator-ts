@@ -17,12 +17,16 @@ const AddChild = () => {
 			? setNoOfChild((prev) => prev + 1)
 			: setNoOfChild((prev) => (prev > 0 ? prev - 1 : prev));
 
+		console.log("parent Id:", parent.id);
+
 		if (type === 1 && parent) {
 			const nodeType = "default";
 
 			return dispatch(
-				nodeActions.addNode({
-					id: `${parent.id}-${noOfChild}`,
+				nodeActions.addChildNode({
+					id: `${parent.id}-child${
+						parent.children ? parent.children?.length + 1 : 1
+					}`,
 					position: {
 						x: parent.position.x + 200,
 						y:
@@ -32,7 +36,7 @@ const AddChild = () => {
 					type: nodeType,
 					isParent: false,
 					isChild: true,
-					parent: parent.id,
+					parentId: parent.id,
 					data: { label: `child ${noOfChild}` },
 					width: 200,
 					height: 1,
@@ -40,7 +44,7 @@ const AddChild = () => {
 			);
 		}
 
-		return dispatch(nodeActions.removeNode(noOfChild - 1));
+		return dispatch(nodeActions.removeNode(`${noOfChild - 1}`));
 	};
 
 	console.log(parent);

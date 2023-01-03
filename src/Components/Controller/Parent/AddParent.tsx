@@ -22,7 +22,7 @@ const AddParent: FC = () => {
 			if (noOfParents > 1) {
 				dispatch(
 					nodeActions.changeType({
-						id: noOfParents - 1,
+						id: `${noOfParents - 1}`,
 						type: "default",
 					})
 				);
@@ -30,7 +30,7 @@ const AddParent: FC = () => {
 
 			return dispatch(
 				nodeActions.addNode({
-					id: noOfParents,
+					id: `${noOfParents}`,
 					position: {
 						x: 350,
 						y: nodeHeight * (noOfParents + (noOfParents + 1)),
@@ -47,12 +47,12 @@ const AddParent: FC = () => {
 		if (noOfParents > 2)
 			dispatch(
 				nodeActions.changeType({
-					id: noOfParents - 2,
+					id: `${noOfParents - 2}`,
 					type: "output",
 				})
 			);
 
-		return dispatch(nodeActions.removeNode(noOfParents - 1));
+		return dispatch(nodeActions.removeNode(`${noOfParents - 1}`));
 	};
 
 	return (
