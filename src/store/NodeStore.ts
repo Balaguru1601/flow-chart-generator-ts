@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 import { Node } from "reactflow";
 
@@ -10,12 +10,14 @@ interface nodeItem extends Node {
 	};
 	type: "output" | "default" | "input";
 	isParent: boolean;
-	isChild: boolean;
+	isChild?: boolean;
 	data: {
 		label?: string;
 	};
 	width: number;
 	height: number;
+	children?: string[];
+	parentId?: string;
 }
 
 interface NodeListState {
@@ -62,7 +64,8 @@ const NodeSlice = createSlice({
 	name: "Node",
 	initialState: initialNodeState,
 	reducers: {
-		addNode(state: NodeListState, action) {
+		addNode(state: NodeListState, action: PayloadAction<nodeItem>) {
+			console.log([...state.nodeList]);
 			return {
 				nodeList: [...state.nodeList, action.payload],
 				initial: false,
@@ -70,7 +73,25 @@ const NodeSlice = createSlice({
 			};
 		},
 
-		removeNode(state: NodeListState, action) {
+		addChildNode(state: NodeListState, action: PayloadAction<nodeItem>) {
+			const parent = state.selected;
+			parent?.children?.push(action.payload.id);
+			const newNodeList = state.nodeList.filter(
+				(node) => node.id !== action.payload.parentId
+			);
+			console.log([...newNodeList, parent, action.payload]);
+			console.log(state.nodeList[0].position);
+			return {
+				nodeList: [...state.nodeList, action.payload],
+				initial: false,
+				selected:
+					state.nodeList.find(
+						(item) => item.id === action.payload.parentId
+					) || null,
+			};
+		},
+
+		removeNode(state: NodeListState, action: PayloadAction<string>) {
 			const newNodes = state.nodeList.filter(
 				(node) => node.id !== action.payload
 			);
@@ -78,7 +99,13 @@ const NodeSlice = createSlice({
 			return { nodeList: [...newNodes], initial, selected: null };
 		},
 
-		changeType(state: NodeListState, action) {
+		changeType(
+			state: NodeListState,
+			action: PayloadAction<{
+				id: string;
+				type: "output" | "default" | "input";
+			}>
+		) {
 			const changeNodes = state.nodeList.map((node) =>
 				node.id === action.payload.id
 					? { ...node, type: action.payload.type }
@@ -91,7 +118,15 @@ const NodeSlice = createSlice({
 			};
 		},
 
-		updateSelectedNode(state: NodeListState, { payload }) {
+		updateSelectedNode(
+			state: NodeListState,
+			{
+				payload,
+			}: PayloadAction<{
+				id?: string;
+				type: string;
+			}>
+		) {
 			if (payload.type === "add") {
 				const selectedNode = state.nodeList.find(
 					(node) => node.id === payload.id
