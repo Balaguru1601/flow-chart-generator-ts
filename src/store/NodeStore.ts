@@ -16,14 +16,14 @@ interface nodeItem extends Node {
 	};
 	width: number;
 	height: number;
-	children?: string[];
+	children: string[];
 	parentId?: string;
 }
 
 interface NodeListState {
 	initial: boolean;
 	nodeList: nodeItem[];
-	selected: nodeItem | null;
+	selected: string | null;
 }
 
 const initialNodeState: NodeListState = {
@@ -67,27 +67,35 @@ const NodeSlice = createSlice({
 		addNode(state: NodeListState, action: PayloadAction<nodeItem>) {
 			console.log([...state.nodeList]);
 			return {
-				nodeList: [...state.nodeList, action.payload],
+				nodeList: [
+					...state.nodeList,
+					{ ...action.payload, children: [] },
+				],
 				initial: false,
 				selected: null,
 			};
 		},
 
 		addChildNode(state: NodeListState, action: PayloadAction<nodeItem>) {
-			const parent = state.selected;
-			parent?.children?.push(action.payload.id);
+			const parent = state.nodeList.find(
+				(item) => item.id === state.selected
+			);
+			console.log(parent?.id);
 			const newNodeList = state.nodeList.filter(
 				(node) => node.id !== action.payload.parentId
 			);
-			console.log([...newNodeList, parent, action.payload]);
-			console.log(state.nodeList[0].position);
+			if (parent) {
+				const children = [...parent.children, action.payload.id];
+				newNodeList.push({
+					...parent,
+					children: [...parent.children, action.payload.id],
+				});
+			}
+
 			return {
-				nodeList: [...state.nodeList, action.payload],
+				nodeList: [...newNodeList, action.payload],
 				initial: false,
-				selected:
-					state.nodeList.find(
-						(item) => item.id === action.payload.parentId
-					) || null,
+				selected: parent?.id || null,
 			};
 		},
 
@@ -133,7 +141,7 @@ const NodeSlice = createSlice({
 				);
 				return {
 					...state,
-					selected: selectedNode ? selectedNode : null,
+					selected: selectedNode ? selectedNode.id : null,
 				};
 			}
 

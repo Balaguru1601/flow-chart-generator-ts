@@ -9,7 +9,9 @@ const nodeHeight = 44;
 
 const AddChild = () => {
 	const [noOfChild, setNoOfChild] = useState(0);
-	const parent = useSelector((state: RootState) => state.node.selected);
+	const parent = useSelector((state: RootState) =>
+		state.node.nodeList.find((item) => item.id === state.node.selected)
+	);
 	const dispatch = useDispatch();
 
 	const changeNoOfChild = (type: number) => {
@@ -17,14 +19,12 @@ const AddChild = () => {
 			? setNoOfChild((prev) => prev + 1)
 			: setNoOfChild((prev) => (prev > 0 ? prev - 1 : prev));
 
-		console.log("parent Id:", parent.id);
-
 		if (type === 1 && parent) {
 			const nodeType = "default";
 
 			return dispatch(
 				nodeActions.addChildNode({
-					id: `${parent.id}-child${
+					id: `${parent.id}-child-${
 						parent.children ? parent.children?.length + 1 : 1
 					}`,
 					position: {
@@ -40,14 +40,16 @@ const AddChild = () => {
 					data: { label: `child ${noOfChild}` },
 					width: 200,
 					height: 1,
+					children: [],
 				})
 			);
 		}
-
-		return dispatch(nodeActions.removeNode(`${noOfChild - 1}`));
+		if (parent)
+			return dispatch(
+				nodeActions.removeNode(`${parent.id}-child-${noOfChild}`)
+			);
 	};
 
-	console.log(parent);
 	return (
 		<Fragment>
 			<Typography variant="h6">

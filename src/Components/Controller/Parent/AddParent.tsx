@@ -40,6 +40,7 @@ const AddParent: FC = () => {
 					data: { label: `parent ${noOfParents}` },
 					width: 200,
 					height: 1,
+					children: [],
 				})
 			);
 		}
