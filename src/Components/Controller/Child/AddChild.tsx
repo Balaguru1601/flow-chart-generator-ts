@@ -1,5 +1,5 @@
 import { IconButton, Typography } from "@mui/material";
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Remove as RemoveIcon, Add as AddIcon } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
 import { nodeActions } from "../../../store/NodeStore";
@@ -9,10 +9,16 @@ const nodeHeight = 44;
 
 const AddChild = () => {
 	const [noOfChild, setNoOfChild] = useState(0);
-	const parent = useSelector((state: RootState) =>
-		state.node.nodeList.find((item) => item.id === state.node.selected)
-	);
+	const parent = useSelector((state: RootState) => {
+		const node = state.node.nodeList.find(
+			(item) => item.id === state.node.selected
+		);
+		return node;
+	});
+	// console.log("parent: ", parent, noOfChild);
 	const dispatch = useDispatch();
+
+	useEffect(() => setNoOfChild(parent?.children.length || 0), [parent]);
 
 	const changeNoOfChild = (type: number) => {
 		type === 1
@@ -44,17 +50,15 @@ const AddChild = () => {
 				})
 			);
 		}
-		if (parent)
-			return dispatch(
-				nodeActions.removeNode(`${parent.id}-child-${noOfChild}`)
-			);
+
+		return dispatch(
+			nodeActions.removeNode(`${parent!.id}-child-${noOfChild}`)
+		);
 	};
 
 	return (
 		<Fragment>
-			<Typography variant="h6">
-				Parent : {parent && parent.data.label}
-			</Typography>
+			<Typography variant="h6">Parent : {parent!.data.label}</Typography>
 			<IconButton onClick={() => changeNoOfChild(-1)} size="small">
 				<RemoveIcon />
 			</IconButton>

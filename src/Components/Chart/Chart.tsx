@@ -18,7 +18,6 @@ const Chart = () => {
 	const nodes = useSelector((state: RootState) => state.node.nodeList);
 
 	const selectNode = (id: string | null) => {
-		console.log("id: ", id);
 		if (id)
 			return dispatch(
 				nodeActions.updateSelectedNode({ type: "add", id })

@@ -1,8 +1,9 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 import { Node } from "reactflow";
+import { CalculateChildPosition } from "../Utilities/Child/CalculateChildPosition";
 
-interface nodeItem extends Node {
+export interface nodeItem extends Node {
 	id: string;
 	position: {
 		x: number;
@@ -16,6 +17,7 @@ interface nodeItem extends Node {
 	};
 	width: number;
 	height: number;
+	// stores the ids of all childs
 	children: string[];
 	parentId?: string;
 }
@@ -80,22 +82,37 @@ const NodeSlice = createSlice({
 			const parent = state.nodeList.find(
 				(item) => item.id === state.selected
 			);
-			console.log(parent?.id);
-			const newNodeList = state.nodeList.filter(
-				(node) => node.id !== action.payload.parentId
+			const newChild = action.payload;
+			// A list of nodes containing all nodes except the selected node and its children
+			const separatedList = state.nodeList.filter(
+				(node) =>
+					node.id !== action.payload.parentId &&
+					node.parentId !== state.selected
 			);
-			if (parent) {
-				const children = [...parent.children, action.payload.id];
-				newNodeList.push({
-					...parent,
-					children: [...parent.children, action.payload.id],
-				});
-			}
+
+			const childList = state.nodeList.filter(
+				(node) => node.parentId === state.selected
+			);
+
+			console.log(childList);
+
+			const newChildList = CalculateChildPosition(parent!, [
+				...childList,
+				{ ...newChild },
+			]);
+
+			separatedList.push(
+				{
+					...parent!,
+					children: [...parent!.children, action.payload.id],
+				},
+				...newChildList
+			);
 
 			return {
-				nodeList: [...newNodeList, action.payload],
+				nodeList: [...separatedList, action.payload],
 				initial: false,
-				selected: parent?.id || null,
+				selected: parent!.id,
 			};
 		},
 
@@ -147,6 +164,11 @@ const NodeSlice = createSlice({
 
 			return { ...state, selected: null };
 		},
+
+		// getNoOfChildren(state: NodeListState, action: PayloadAction<string>) {
+		//     const node = state.nodeList.find((item) => item.id === action.payload);
+		//     return node?.children.length || 0;
+		// }
 	},
 });
 
