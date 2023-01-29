@@ -67,7 +67,7 @@ const NodeSlice = createSlice({
 	initialState: initialNodeState,
 	reducers: {
 		addNode(state: NodeListState, action: PayloadAction<nodeItem>) {
-			console.log([...state.nodeList]);
+			console.log(JSON.parse(JSON.stringify(state.nodeList)));
 			return {
 				nodeList: [
 					...state.nodeList,
@@ -94,11 +94,12 @@ const NodeSlice = createSlice({
 				(node) => node.parentId === state.selected
 			);
 
-			console.log(childList);
+			console.log(JSON.parse(JSON.stringify(childList)));
+			console.log(JSON.parse(JSON.stringify(separatedList)));
 
 			const newChildList = CalculateChildPosition(parent!, [
 				...childList,
-				{ ...newChild },
+				newChild,
 			]);
 
 			separatedList.push(
@@ -109,11 +110,10 @@ const NodeSlice = createSlice({
 				...newChildList
 			);
 
-			return {
-				nodeList: [...separatedList, action.payload],
-				initial: false,
-				selected: parent!.id,
-			};
+			console.log(JSON.parse(JSON.stringify(newChild)));
+
+			state.nodeList = [...separatedList];
+			return state;
 		},
 
 		removeNode(state: NodeListState, action: PayloadAction<string>) {
